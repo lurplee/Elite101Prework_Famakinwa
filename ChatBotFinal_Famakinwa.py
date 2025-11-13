@@ -237,7 +237,7 @@ class restaurantApp:
     def type(self,message):
         for char in message:
             time.sleep(0.1)
-            print(char, end="", flush=True) #Code adapted from https://stackoverflow.com/questions/20302331/typing-effect-in-python
+            print(char, end="", flush=True) #Code adapted from - https://stackoverflow.com/questions/20302331/typing-effect-in-python
         print("\n")
 
 
