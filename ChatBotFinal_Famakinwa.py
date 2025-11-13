@@ -3,6 +3,7 @@ import random
 import time
 #Used https://www.w3schools.com/python/python_string_formatting.asp to figure out string formatting
 
+#TOPIC: Restaurant
 all_rewards_members =[]
 current_member ={}
 
@@ -15,14 +16,17 @@ class restaurantApp:
             self.past_orders =[]
             self.all_reservations =[]
 
+    #Formatter
     def header(self,title):
          return(f"{self.divider}\n{title}\n{self.divider}\n")
 
+    # Allows a controlled return to the main menu after each action
     def directory_return(self):
         input(self.header("Click ENTER to return to main directory"))
         print("\x1b[H\x1b[2J", end="") #Adapted from https://github.com/orgs/pybricks/discussions/1074
         self.main_directory()
 
+    # Checks if user has rewards before beginning program
     def check_rewards(self):
         login_choice =1
 
@@ -49,6 +53,7 @@ class restaurantApp:
                             return
 
                         if self.rewards_status ==  False:
+                            # Makes sure that rewards account is actually created before proceeding
                             self.type("Hmm...looks like we can't find that rewards number - Try Again")
                             login_choice = int(input("[1] Login into Rewards Account\n[2] Create an Account\n[3] Continue as Guest\n"))
 
@@ -75,6 +80,7 @@ class restaurantApp:
                         while current_number in all_rewards_members:
                             current_number = f"P{random.randint(100,999)}"
 
+                        #Formatting user info and forcing them to log in afterwards
                         self.current_member = {"Rewards Number": current_number,"Name": current_name, "Email": current_email, "Age": current_age}
                         all_rewards_members.append(self.current_member)
                         self.type(f"Awesome to meet you, {current_name}! View your info below and log into your new account.")
@@ -83,7 +89,8 @@ class restaurantApp:
                         login_choice =1
 
 
-            
+                
+                    # Directly goes to main_menu()
 
                     elif login_choice ==3:
                         print(self.header("CONTINUE AS GUEST"))
@@ -97,7 +104,7 @@ class restaurantApp:
 
         
 
-
+# Displays both food and drink menus
     def view_menu(self):
         self.type(f"We have lots of great options at Pepe's!")
         dish_number = 1
@@ -117,6 +124,7 @@ class restaurantApp:
             dish_number +=1
     
 
+# Allows user to place a reservation
     def place_reservation(self):
         self.type("Good Idea! Spaces at Pepe's always fill up quickly. Enter the information below to reserve your spot.")
         
@@ -126,20 +134,25 @@ class restaurantApp:
         reservation_day = int(input("Reservation Day (Enter NUMBER ONLY): "))
         reservation_time = int(input("Reservation Time - HOURS: 7AM - 3PM (Enter NUMBER ONLY): "))
 
+        #Forces user to end a valid reservation time
         while reservation_time not in [7,8,9,10,11,12,1,2,3]:
             self.type("Sorry, that is an invalid time. We are open from 7AM-3PM - Please try again!")
             reservation_time = int(input("Reservation Time - HOURS: 7AM - 3PM (Enter NUMBER ONLY): "))
 
+    # Formats time based on time of day inserted
         if (1 <= reservation_time <=3):
             full_reservation = datetime.datetime(2025, reservation_month, reservation_day, reservation_time+12).strftime("%A, %B %d at %I %p")
         elif (reservation_time ==12):
             full_reservation = datetime.datetime(2025, reservation_month, reservation_day, 12).strftime("%A, %B %d at %I %p")
         elif 7 <= reservation_time < 12:
             full_reservation = datetime.datetime(2025, reservation_month, reservation_day, reservation_time).strftime("%A, %B %d at %I %p")
-        
+
+   # Saves reservation in all_reservations for the view_reservations method    
         self.all_reservations.append(full_reservation)
+    # Success message
         self.type(f"\nYay! I've confirmed your reservation for {reservation_party_size} on {full_reservation} - We'll See You Soon!\n")
 
+    # Allows user to view their rewards and past orders, if they have a rewards account
     def view_rewards(self):
         order_number =1
         total_points =0
@@ -160,8 +173,10 @@ class restaurantApp:
 
                 print(self.header(f"TOTAL AMOUNT SPENT: ${total_amount_spent:.2f}\nTOTAL POINTS: {total_points}"))
             else:
+                #If user is logged in but has no orders on account, then a notification is printed
                 (self.type("Sorry, looks like you have no orders on account! Feel free to order by clicking [3] on the main menu."))
         else:
+            # If user is not logged in, prompts them to create an account
             self.type("Sorry, looks like you're not logged in at the moment. Would you like to create an account? [Y/N]: ")
             create_account_request = input().upper()
             if create_account_request == "Y":
@@ -169,6 +184,7 @@ class restaurantApp:
             else:
                 exit()
 
+    # Uses the all_reservations list to print all reservations
     def view_reservations(self):
         if self.rewards_status:
             if len(self.all_reservations) > 0:
@@ -188,10 +204,7 @@ class restaurantApp:
                 exit()
 
 
-            
-
-
-
+    # Prints the full menu, and then prompts user for their menu item #. 
 
     def place_order(self):
         self.view_menu()
@@ -212,7 +225,7 @@ class restaurantApp:
             add_item = input("Would you like to add another item? [Y/N]\n").upper()
 
 
-
+# Prints the total + all menu items
         print(self.header("RECIEPT"))
         for menu_item,price in order_items:
             formatted_items.append(f"{menu_item} --- ${price:.2f}")
@@ -220,7 +233,7 @@ class restaurantApp:
         formatted_order = "\n".join(formatted_items)
         print(formatted_order)
             
-        
+        # Logged in users get a 10% Discount!
         if self.rewards_status == True:
             order_discount = round(order_total *0.1,2)
             order_total = order_total *0.9
@@ -229,6 +242,7 @@ class restaurantApp:
 
         tip_request = input("Would you like to enter a tip [Y/N]\n").upper()
 
+        # Allows for tip if wanted!
         if tip_request == "Y":
             tip = int(input("Tip Percentage: "))
             tip = abs(tip)
@@ -240,12 +254,18 @@ class restaurantApp:
 
         print(f"Tip Amount: ${tip_amount:.2f}\nOrder Total: ${order_total:.2f}")
 
+
+        # Records the date and points allocated to the order AND adds the new order to a list of all past orders
         order_date = datetime.datetime.now().strftime("%A, %B %d")
         order_points = round(order_total *100,0)
         new_order = {"Items": formatted_order, "Order Total": round(order_total,2), "Member Discount": round(order_discount,2), "Tip":tip_amount, "Order Date": order_date, "Order Points": order_points}
         self.past_orders.append(new_order)
+
+        # Success Message
         self.type(f"\nThank you for choosing Pepe's Cafe, {self.name}! Your order will be ready for pick up within the next hour!\n")
 
+
+    #Main Menu
 
     def main_directory(self):
         directory_choice= 1
@@ -285,6 +305,8 @@ class restaurantApp:
             except ValueError: #ValueError exception learned from -https://www.w3schools.com/python/ref_exception_valueerror.asp
                 print("INVALID CHOICE - PLEASE TRY AGAIN!")
 
+
+    # Simulated Typing for ChatBot
     def type(self,message):
         for char in message:
             time.sleep(0.04)
@@ -292,10 +314,9 @@ class restaurantApp:
         print("\n")
 
 
-
+#Running everything together
 app = restaurantApp()
 print(app.header("WELCOME TO PEPE'S CAFE APP!"))
 app.type("Hello, I'm PepeBot and I'll be helping you today! But first you will need to...")
-
 app.check_rewards()
 app.main_directory()
