@@ -13,6 +13,7 @@ class restaurantApp:
             self.name = ""
             self.current_member = current_member
             self.past_orders =[]
+            self.all_reservations =[]
 
     def header(self,title):
          return(f"{self.divider}\n{title}\n{self.divider}\n")
@@ -35,7 +36,8 @@ class restaurantApp:
 
                     if login_choice == 1:
                         print(self.header("LOGIN INTO REWARDS ACCOUNT"))
-                        rewards_number_given = input("Rewards Number: ").upper()
+                        self.type("Alright! Enter Your Rewards Number Below: ")
+                        rewards_number_given = input().upper()
 
                         for rewards_member in all_rewards_members:
                             if rewards_number_given == rewards_member["Rewards Number"]:
@@ -43,41 +45,61 @@ class restaurantApp:
                                 self.rewards_status = True
                                 self.name = rewards_member["Name"]
                                 current_member = rewards_member
-                                return None
-                            
+                                self.account_success = True
+                            return
+
                         if self.rewards_status ==  False:
-                            print(self.header("Rewards Number Not Found - Please Try Again."))
+                            self.type("Hmm...looks like we can't find that rewards number - Try Again")
                             login_choice = int(input("[1] Login into Rewards Account\n[2] Create an Account\n[3] Continue as Guest\n"))
 
 
-                    if login_choice == 2:
+                    elif login_choice == 2:
                         print(self.header("CREATE A REWARDS ACCOUNT"))
+                        self.type("Sounds good! We'll just need some information to get started!")
                         current_name = input("Name: ")
                         current_email = input("Email: ")
-                        current_address = input("Address: ")
 
+                        #Ensuring that current_age will be 16 or higher
+                        current_age=1
+                        current_age = int(input("Age (MUST BE 16+): "))
+
+                        if current_age < 16:
+                            while current_age<16:
+                                self.type("Sorry, you must be 16 to create an account.")
+                                current_age = int(input("Age (MUST BE 16+): "))
+                                
+                            
+
+                        #Generates a unique, random rewards_number
                         current_number = f"P{random.randint(100,999)}"
-                        self.current_member = {"Rewards Number": current_number,"Name": current_name, "Email": current_email, "Address": current_address}
+                        while current_number in all_rewards_members:
+                            current_number = f"P{random.randint(100,999)}"
+
+                        self.current_member = {"Rewards Number": current_number,"Name": current_name, "Email": current_email, "Age": current_age}
                         all_rewards_members.append(self.current_member)
-                        print(self.header("Rewards Account Created!"))
-                        print(self.header(f"Rewards Number: {self.current_member['Rewards Number']}\nName: {self.current_member['Name'].upper()}\nEmail: {self.current_member['Email'].upper()}\nAddress: {self.current_member['Address'].upper()}"))
+                        self.type(f"Awesome to meet you, {current_name}! View your info below and log into your new account.")
+                        print(self.header(f"Rewards Number: {self.current_member['Rewards Number']}\nName: {self.current_member['Name'].upper()}\nEmail: {self.current_member['Email'].upper()}\nAge: {self.current_member['Age']}"))
+                        self.name = current_name.title()
                         login_choice =1
+
+
             
 
-                    if login_choice ==3:
+                    elif login_choice ==3:
                         print(self.header("CONTINUE AS GUEST"))
                         self.name = "Guest"
+                        return
 
-                        return None
+
             except: 
-                print("INVALID OPTION - TRY AGAIN.")
+                self.type("Invalid Input!")
 
 
         
 
 
     def view_menu(self):
-        self.type(f"We have lots of great options at Pepe's! What are we feeling today, {self.name}?")
+        self.type(f"We have lots of great options at Pepe's!")
         dish_number = 1
         food_menu = {"Pain au Chocolat": 4.50, "Bagel with Cream Cheese" : 3.00, "Waffles": 8, "Muffin": 4.50}
         drink_menu = {"Hot Latte": 5.00, "Iced Latte": 5.00, "Hot Americano": 3.00,"Iced Americano": 3.00,"Hot Mocha": 6.00,"Iced Mocha": 6.00,"Hot Chocolate": 5, "Cappucino":4.00, "Pup's Coffee of the Day": 2.00, "Cold Brew": 5.0, "Chai Latte (ICED ONLY)": 6.0, "Matcha Latte (ICED ONLY)": 6.0}
@@ -96,38 +118,34 @@ class restaurantApp:
     
 
     def place_reservation(self):
-        reservation_confirmation ="N"
+        self.type("Good Idea! Spaces at Pepe's always fill up quickly. Enter the information below to reserve your spot.")
+        
 
-        while reservation_confirmation != "Y":
-            reservation_month = int(input("Reservation Month (Enter NUMBER ONLY): "))
-            reservation_day = int(input("Reservation Day (Enter NUMBER ONLY): "))
+        reservation_party_size = int(input("Party Size (Enter NUMBER ONLY): "))
+        reservation_month = int(input("Reservation Month (Enter NUMBER ONLY): "))
+        reservation_day = int(input("Reservation Day (Enter NUMBER ONLY): "))
+        reservation_time = int(input("Reservation Time - HOURS: 7AM - 3PM (Enter NUMBER ONLY): "))
 
-
+        while reservation_time not in [7,8,9,10,11,12,1,2,3]:
+            self.type("Sorry, that is an invalid time. We are open from 7AM-3PM - Please try again!")
             reservation_time = int(input("Reservation Time - HOURS: 7AM - 3PM (Enter NUMBER ONLY): "))
 
-            while reservation_time not in [7,8,9,10,11,12,1,2,3]:
-                print("Sorry, that is an invalid time. We are open from 7AM-3PM - Please try again!")
-                reservation_time = int(input("Reservation Time - HOURS: 7AM - 3PM (Enter NUMBER ONLY): "))
-
-            if (1 <= reservation_time <=3):
-                full_reservation = datetime.datetime(2025, reservation_month, reservation_day, reservation_time+12).strftime("%A, %B %d at %I %p")
-            elif (reservation_time ==12):
-                full_reservation = datetime.datetime(2025, reservation_month, reservation_day, 12).strftime("%A, %B %d at %I %p")
-            elif 7 <= reservation_time < 12:
-                full_reservation = datetime.datetime(2025, reservation_month, reservation_day, reservation_time).strftime("%A, %B %d at %I %p")
-
-
-
-            reservation_confirmation = input(f"{self.name.upper()}'s Reservation set for {full_reservation}\nCONFIRM? [Y/N]\n").upper()
+        if (1 <= reservation_time <=3):
+            full_reservation = datetime.datetime(2025, reservation_month, reservation_day, reservation_time+12).strftime("%A, %B %d at %I %p")
+        elif (reservation_time ==12):
+            full_reservation = datetime.datetime(2025, reservation_month, reservation_day, 12).strftime("%A, %B %d at %I %p")
+        elif 7 <= reservation_time < 12:
+            full_reservation = datetime.datetime(2025, reservation_month, reservation_day, reservation_time).strftime("%A, %B %d at %I %p")
         
-        
-        print(f"\nConfirmed Reservation for {full_reservation} - We'll See You Soon!\n")
+        self.all_reservations.append(full_reservation)
+        self.type(f"\nYay! I've confirmed your reservation for {reservation_party_size} on {full_reservation} - We'll See You Soon!\n")
 
     def view_rewards(self):
         order_number =1
         total_points =0
         total_amount_spent = 0
         if self.rewards_status:
+            self.type("Let's see those points!")
             if len(self.past_orders) != 0:
                 for order in self.past_orders:
                     total_amount_spent += order["Order Total"]
@@ -142,9 +160,38 @@ class restaurantApp:
 
                 print(self.header(f"TOTAL AMOUNT SPENT: ${total_amount_spent:.2f}\nTOTAL POINTS: {total_points}"))
             else:
-                print(self.header("SORRY, YOU HAVE NO ORDERS ON ACCOUNT!"))
+                (self.type("Sorry, looks like you have no orders on account! Feel free to order by clicking [3] on the main menu."))
         else:
-            print(self.header("NOT LOGGED IN"))
+            self.type("Sorry, looks like you're not logged in at the moment. Would you like to create an account? [Y/N]: ")
+            create_account_request = input().upper()
+            if create_account_request == "Y":
+                self.check_rewards()
+            else:
+                exit()
+
+    def view_reservations(self):
+        if self.rewards_status:
+            if len(self.all_reservations) > 0:
+                self.type(f"You have {len(self.all_reservations)} reservations. View them below")
+
+                for reservation in self.all_reservations:
+                    print(self.header(reservation))
+            else:
+                self.type("Sorry, looks like you have no reservations on account! Place a reservation by clicking [1] on the main menu.")
+        
+        else:
+            self.type("Sorry, looks like you're not logged in at the moment. Would you like to create an account? [Y/N]: ")
+            create_account_request = input().upper()
+            if create_account_request == "Y":
+                self.check_rewards()
+            else:
+                exit()
+
+
+            
+
+
+
 
     def place_order(self):
         self.view_menu()
@@ -152,7 +199,7 @@ class restaurantApp:
         order_items= []
         formatted_items =[]
 
-
+        self.type(f"So many options! What are we feeling today, {self.name}?")
         add_item = "Y"
 
 
@@ -197,20 +244,19 @@ class restaurantApp:
         order_points = round(order_total *100,0)
         new_order = {"Items": formatted_order, "Order Total": round(order_total,2), "Member Discount": round(order_discount,2), "Tip":tip_amount, "Order Date": order_date, "Order Points": order_points}
         self.past_orders.append(new_order)
-        print(self.header(f"Thank you for choosing Pepe's Cafe, {self.name}! Your order will be ready for pick up within the next hour!"))
+        self.type(f"\nThank you for choosing Pepe's Cafe, {self.name}! Your order will be ready for pick up within the next hour!\n")
 
 
     def main_directory(self):
         directory_choice= 1
-        menu = self.header(f"HELLO, {self.name.upper()}!")+ "\n[1] Place a Reservation\n[2] View Menu\n[3] Place a Pickup Order\n[4] View Rewards Status\n[5] EXIT\n"
-        
+        menu = self.header(f"WHAT CAN I DO FOR YOU, {self.name.upper()}?")+ "\n[1] Place a Reservation\n[2] View Menu\n[3] Place a Pickup Order\n[4] View Rewards Status\n[5] View Reservations\n[6] EXIT\n"
         while directory_choice:
             try:
                 directory_choice = int(input(menu))
 
-                while directory_choice not in [1,2,3,4,5]:
+                while directory_choice not in [1,2,3,4,5,6]:
                     raise("INVALID OPTION")
-                while directory_choice in [1,2,3,4,5]:
+                while directory_choice in [1,2,3,4,5,6]:
                     if directory_choice ==1:
                         print(self.header("PLACE RESERVATION"))
                         self.place_reservation()
@@ -228,15 +274,20 @@ class restaurantApp:
                             print(self.header(f"VIEW {self.name.upper()}'s REWARDS"))
                         self.view_rewards()
                         self.directory_return()
-                    if directory_choice==5:
-                            print(self.header("WE'LL SEE YOU SOON!"))
+                    if directory_choice ==5:
+                        print(self.header("VIEW RESERVATIONS"))
+                        self.view_reservations()
+                        self.directory_return()
+                    if directory_choice==6:
+                            print(self.header("THANK YOU FOR VISITING PEPE'S, WE'LL SEE YOU SOON!"))
                             exit()
-            except:
+                        
+            except ValueError: #ValueError exception learned from -https://www.w3schools.com/python/ref_exception_valueerror.asp
                 print("INVALID CHOICE - PLEASE TRY AGAIN!")
 
     def type(self,message):
         for char in message:
-            time.sleep(0.1)
+            time.sleep(0.08)
             print(char, end="", flush=True) #Code adapted from - https://stackoverflow.com/questions/20302331/typing-effect-in-python
         print("\n")
 
@@ -244,6 +295,7 @@ class restaurantApp:
 
 app = restaurantApp()
 print(app.header("WELCOME TO PEPE'S CAFE APP!"))
-app.type("Hello")
+app.type("Hello, I'm PepeBot and I'll be helping you today! But first you will need to...")
+
 app.check_rewards()
 app.main_directory()
