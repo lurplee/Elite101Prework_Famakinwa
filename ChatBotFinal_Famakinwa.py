@@ -2,7 +2,7 @@ import datetime
 import random
 import time
 #Used https://www.w3schools.com/python/python_string_formatting.asp to figure out string formatting
-# Make more cas
+
 all_rewards_members =[]
 current_member ={}
 
@@ -287,7 +287,7 @@ class restaurantApp:
 
     def type(self,message):
         for char in message:
-            time.sleep(0.08)
+            time.sleep(0.04)
             print(char, end="", flush=True) #Code adapted from - https://stackoverflow.com/questions/20302331/typing-effect-in-python
         print("\n")
 
